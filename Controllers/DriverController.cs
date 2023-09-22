@@ -16,8 +16,35 @@ namespace NetWebAPI.Controllers
         // GET: Driver
         public ActionResult Index()
         {
-            return View();
+            IEnumerable<DriverInfoModel> driverInfo = null;
+
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri("https://localhost:44348/api/DriverAPI");
+                //HTTP GET
+                var responseTask = client.GetAsync("DriverAPI");
+                responseTask.Wait();
+
+                var result = responseTask.Result;
+                if (result.IsSuccessStatusCode)
+                {
+                    var readTask = result.Content.ReadAsAsync<IList<DriverInfoModel>>();
+                    readTask.Wait();
+
+                    driverInfo = readTask.Result;
+                }
+                else //web api sent error response 
+                {
+                    //log response status here..
+
+                    driverInfo = Enumerable.Empty<DriverInfoModel>();
+
+                    ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
+                }
+            }
+            return View(driverInfo);
         }
+
         //GET: Driver/Create
         public ActionResult Create()
         {
@@ -33,6 +60,7 @@ namespace NetWebAPI.Controllers
             return View(model);
         }
 
+        //POST: Driver/Create
         [HttpPost]
         public ActionResult Create(DriverInfoModel model)
         {
@@ -47,7 +75,7 @@ namespace NetWebAPI.Controllers
                 var result = postTask.Result;
                 if (result.IsSuccessStatusCode)
                 {
-                    return RedirectToAction("Index","Home");
+                    return RedirectToAction("Index");
                 }
             }
 
