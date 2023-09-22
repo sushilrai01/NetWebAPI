@@ -1,6 +1,4 @@
-﻿using DriverInformation.ViewModel;
-using NetWebAPI.Models;
-using System;
+﻿using NetWebAPI.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -9,6 +7,7 @@ using System.Web.Http;
 
 namespace NetWebAPI.Controllers
 {
+    
     public class DriverAPIController : ApiController
     {
         private DriverManagementEntities db = new DriverManagementEntities();
@@ -34,28 +33,23 @@ namespace NetWebAPI.Controllers
             return Ok(driverInfo);
         }
 
-        public IHttpActionResult PostNewDriver(DriverInfoModel model)
+        [Route("NewDriver")]
+        [HttpPost]
+        public HttpResponseMessage NewDriver(DriverInfoModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest("Invalid Data");  
-            }
-
+            
             DriverTable drivertbl = new DriverTable();
 
-            drivertbl.DriverId = model.DriverId;
+           
             drivertbl.Name = model.DriverName;
             drivertbl.ContactNo = model.ContactNo;      
-            drivertbl.Football = model.Football;
             drivertbl.GenderId = model.GenderId;
             drivertbl.IsActive = model.ActiveId;
-            drivertbl.Basketball = model.Basketball;    
-            drivertbl.Cricket = model.Cricket;
 
             db.DriverTable.Add(drivertbl);
             db.SaveChanges();
 
-            return Ok();
+            return Request.CreateResponse(HttpStatusCode.Created, model);
         }
 
     } //<--MAIN DRIVER-CONTROLLER CLASS.
